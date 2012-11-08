@@ -626,8 +626,11 @@ public class JCRDataStorage implements DataStorage {
     while (iter.hasNext()) {
       Node categoryNode = iter.nextNode();
       String categoryId = categoryNode.getProperty(Utils.EXO_ID).getString();
-      StringBuilder queryString = new StringBuilder("/jcr:root" + calendarHome.getPath() + "//element(*,exo:calendar)[@exo:categoryId='").append(categoryId).append("']");
-      Query query = qm.createQuery(queryString.toString(), Query.XPATH);
+      //StringBuilder queryString = new StringBuilder("/jcr:root" + calendarHome.getPath() + "//element(*,exo:calendar)[@exo:categoryId='").append(categoryId).append("']");
+      //cs-5819
+      StringBuilder queryString = new StringBuilder("select * from exo:calendar where jcr:path like '" 
+        + calendarHome.getPath() + "/%' and exo:categoryId='" + categoryId + "'");      
+      Query query = qm.createQuery(queryString.toString(), Query.SQL);
       QueryResult result = query.execute();
       NodeIterator it = result.getNodes();
       calendars = new ArrayList<Calendar>();
