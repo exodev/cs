@@ -16,15 +16,17 @@
  */
 package org.exoplatform.contact.webui;
 
-import javax.portlet.PortletPreferences;
-
 import org.exoplatform.contact.ContactUtils;
 import org.exoplatform.contact.service.Utils;
 import org.exoplatform.contact.webui.popup.UIPopupAction;
 import org.exoplatform.container.PortalContainer;
+import org.exoplatform.social.common.router.ExoRouter;
 import org.exoplatform.social.core.space.SpaceUtils;
 import org.exoplatform.social.core.space.model.Space;
 import org.exoplatform.social.core.space.spi.SpaceService;
+import org.exoplatform.portal.application.PortalRequestContext;
+import org.exoplatform.portal.application.RequestNavigationData;
+import org.exoplatform.portal.webui.util.Util;
 import org.exoplatform.webui.application.WebuiApplication;
 import org.exoplatform.webui.application.WebuiRequestContext;
 import org.exoplatform.webui.application.portlet.PortletRequestContext;
@@ -67,12 +69,14 @@ public class UIContactPortlet extends UIPortletApplication {
   
   private void processByGroupInSpace(PortletRequestContext pcontext) throws Exception {
     try {
-      PortletPreferences pref = pcontext.getRequest().getPreferences();
-      String url;
+      PortalRequestContext pContext = Util.getPortalRequestContext();
+      String requestPath = pContext.getControllerContext().getParameter(RequestNavigationData.REQUEST_PATH);
+      ExoRouter.Route er = ExoRouter.route(requestPath);
       UIAddressBooks addressBooks = findFirstComponentOfType(UIAddressBooks.class);
-      if ((url = pref.getValue(SpaceUtils.SPACE_URL, null)) != null) {
+      if ( er != null) {
+        String spacePrettyName = er.localArgs.get("spacePrettyName");
         SpaceService sService = (SpaceService) getApplicationComponent(SpaceService.class);
-        Space space = sService.getSpaceByUrl(url);
+        Space space = sService.getSpaceByPrettyName(spacePrettyName);
         String groupId = Utils.ADDRESSBOOK_ID_PREFIX + space.getPrettyName();
         addressBooks.processSelectGroup(pcontext, groupId);
       }
